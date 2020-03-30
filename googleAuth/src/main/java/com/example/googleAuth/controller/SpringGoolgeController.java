@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.social.google.api.plus.Person;
@@ -20,41 +19,83 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.example.googleAuth.model.ApiResponse;
 import com.example.googleAuth.model.UserInfo;
 import com.example.googleAuth.service.GoogleService;
 import com.example.googleAuth.service.SecurityService;
 import com.example.googleAuth.service.UserService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @RestController
 @RequestMapping
+@Api(value = "", description = "")
 public class SpringGoolgeController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SpringGoolgeController.class);
 
-	@Autowired
 	private GoogleService googleService;
-	@Autowired
 	private SecurityService securityService;
-	@Autowired
 	private UserService userService;
 
-	@GetMapping(path = "/googlelogin")
-	public Principal googleLogin(Principal principal) {
-		RedirectView redirectView = new RedirectView();
-		String url = googleService.googleLogin();
-		logger.info("Url " + url);
-		redirectView.setUrl(url); // you can return redirectView as well
-		return principal;
+	public SpringGoolgeController(GoogleService googleService, SecurityService securityService,
+			UserService userService) {
+		this.googleService = googleService;
+		this.securityService = securityService;
+		this.userService = userService;
 	}
 
-	@GetMapping(path = "/google")
+	// @GetMapping(path = "/googlelogin")
+	// @ApiOperation(value = "/googlelogin", notes = "User Login Using Social
+	// Service , Google Account")
+	// public Principal googleLogin(Principal principal) {
+	// logger.info("Inside googleLogin method, To redirect user to google login
+	// page");
+	// RedirectView redirectView = new RedirectView();
+	// String url = googleService.googleLogin(); // get authenticated google
+	// // URL
+	// logger.info("Url--------------------> " + url);
+	// redirectView.setUrl(url); // you can return redirectView as well
+	// return principal;
+	// }
+
+	@GetMapping(path = "/googlelogin")
+	@ApiOperation(value = "/googlelogin", notes = "User Login Using Social Service , Google Account")
+	public RedirectView googleLogin() {
+		logger.info("Inside googleLogin method, To redirect user to google login page");
+		RedirectView redirectView = new RedirectView();
+		String url = googleService.googleLogin(); // get authenticated google
+													// URL
+		logger.info("Url--------------------> " + url);
+		redirectView.setUrl(url); // you can return redirectView as well
+		logger.info("RedirectView " + redirectView);
+		return redirectView;
+	}
+
+	@GetMapping(path = "/googlelogin/{tenantId}")
+	@ApiOperation(value = "/googlelogin", notes = "User Login Using Social Service , Google Account")
+	public ApiResponse googleLogin(Principal principal,
+			@PathVariable(value = "tenantId", required = true) String tenantId) {
+		logger.info("Redirecting tenant------" + tenantId + "---------- To Google Login Page");
+		RedirectView redirectView = new RedirectView();
+		String url = googleService.googleLogin(); // get authenticated google
+													// URL
+		redirectView.setUrl(url); // you can return redirectView as well
+		return new ApiResponse(200, "successfully Redirected To GoogleAuth", url);
+	}
+
+	@GetMapping(path = "/login/oauth2/code/google")
 	public String google(@RequestParam("code") String code) {
+		logger.info("**************Inside the get mapping of /google*******************");
 		String accessToken = googleService.getGoogleAccessToken(code);
+		logger.info("Access Token *************************" + accessToken);
 		return "redirect:/googleprofiledata/" + accessToken;
 	}
 
 	@GetMapping(path = "/googleprofiledata/{accessToken:.+}")
 	public String googleprofiledata(@PathVariable String accessToken, Model model, HttpServletRequest request) {
+		logger.info("Inside googleProfileDate method of SpingGoogleController class");
 		Person user = googleService.getGoogleUserProfile(accessToken);
 
 		// update if first logged in manually ... after that with social

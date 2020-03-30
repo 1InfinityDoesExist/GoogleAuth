@@ -8,6 +8,8 @@ public interface GoogleService {
 
 	public String googleLogin();
 
+	public String googleLoginViaTenantGoolgeAuthDetailsFromDB(String tenantId);
+
 	public String getGoogleAccessToken(String code);
 
 	public Person getGoogleUserProfile(String accessToken);

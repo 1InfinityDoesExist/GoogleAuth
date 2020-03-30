@@ -24,8 +24,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		// TODO Auto-generated method stub
 
-		httpSecurity.antMatcher("/**").authorizeRequests().antMatchers("/").permitAll().anyRequest().authenticated()
-				.and().oauth2Login().and().cors();
+	//	httpSecurity.antMatcher("/**").authorizeRequests().antMatchers("/").permitAll().anyRequest().authenticated()
+	//			.and().oauth2Login().and().cors();
 
 		// httpSecurity.antMatcher("/**").authorizeRequests().antMatchers("/").permitAll().anyRequest().authenticated()
 		// .and().oauth2Login();
